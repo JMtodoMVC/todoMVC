@@ -144,6 +144,10 @@ jQuery(function ($) {
 				}
 			}
 		},
+		getIssues: function (e) {
+
+		},
+
 		create: function (e) {
 			var $input = $(e.target);
 			var val = $input.val().trim();
