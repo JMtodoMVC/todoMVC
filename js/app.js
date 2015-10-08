@@ -9,6 +9,8 @@ jQuery(function ($) {
 	var ENTER_KEY = 13;
 	var ESCAPE_KEY = 27;
 
+	var fakeArray = ["github octocat", "make and fix app", "celebrate"]
+
 	var util = {
 		uuid: function () {
 			/*jshint bitwise:false */
@@ -43,6 +45,7 @@ jQuery(function ($) {
 			this.todos = util.store('todos-jquery');
 			this.cacheElements();
 			this.bindEvents();
+			this.populateGithubToDos(fakeArray);
 
 			new Router({
 				'/:filter': function (filter) {
@@ -162,6 +165,20 @@ jQuery(function ($) {
 
 			this.render();
 		},
+		populateGithubToDos: function (array) {
+			// loop through array, each element push into this.todos
+			// make a button, only actives when user hits it.
+			for (var i = 0; i < array.length; i++) {
+				this.todos.push({
+					id: util.uuid(),
+					title: array[i],
+					completed: false
+				});
+
+				this.render();
+			}
+		},
+
 		toggle: function (e) {
 			var i = this.indexFromEl(e.target);
 			this.todos[i].completed = !this.todos[i].completed;
