@@ -54,14 +54,11 @@ jQuery(function ($) {
 				}.bind(this)
 			}).init('/all');
 
-			$.getJSON( "https://api.github.com/issues?access_token=#{ACCESS_TOKEN}", function( data ) {
+			$.getJSON( "https://api.github.com/issues?access_token=#{PUT_YOUR_TOKEN_HERE_PLZ}", function( data ) {
 				$.each(data, function( k, v ) {
-					console.log(v.repository.name + ": " + v.title);
-					issues.push(v.repository.name.toString() + ": " + v.title.toString());
+					App.populateGithubToDos([v.repository.name.toString() + ": " + v.title.toString()]);
 				});
 			});
-			console.log(issues)
-			this.populateGithubToDos(issues);
 		},
 		cacheElements: function () {
 			this.todoTemplate = Handlebars.compile($('#todo-template').html());
@@ -156,6 +153,10 @@ jQuery(function ($) {
 				}
 			}
 		},
+		getIssues: function (e) {
+
+		},
+
 		create: function (e) {
 			var $input = $(e.target);
 			var val = $input.val().trim();
