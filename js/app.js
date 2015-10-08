@@ -9,7 +9,7 @@ jQuery(function ($) {
 	var ENTER_KEY = 13;
 	var ESCAPE_KEY = 27;
 
-	var fakeArray = ["github octocat", "make and fix app", "celebrate"]
+	// var fakeArray = ["github octocat", "make and fix app", "celebrate"]
 
 	var util = {
 		uuid: function () {
@@ -45,7 +45,7 @@ jQuery(function ($) {
 			this.todos = util.store('todos-jquery');
 			this.cacheElements();
 			this.bindEvents();
-			this.populateGithubToDos(fakeArray);
+			// this.populateGithubToDos(fakeArray);
 
 			new Router({
 				'/:filter': function (filter) {
@@ -53,6 +53,15 @@ jQuery(function ($) {
 					this.render();
 				}.bind(this)
 			}).init('/all');
+
+			$.getJSON( "https://api.github.com/issues?access_token=#{ACCESS_TOKEN}", function( data ) {
+				$.each(data, function( k, v ) {
+					console.log(v.repository.name + ": " + v.title);
+					issues.push(v.repository.name.toString() + ": " + v.title.toString());
+				});
+			});
+			console.log(issues)
+			this.populateGithubToDos(issues);
 		},
 		cacheElements: function () {
 			this.todoTemplate = Handlebars.compile($('#todo-template').html());
