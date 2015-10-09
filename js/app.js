@@ -42,10 +42,10 @@ jQuery(function ($) {
 
 	var App = {
 		init: function () {
+			this.appToken = localStorage.appToken || null;
 			this.todos = util.store('todos-jquery');
 			this.cacheElements();
 			this.bindEvents();
-			// this.populateGithubToDos(fakeArray);
 
 			new Router({
 				'/:filter': function (filter) {
@@ -54,11 +54,15 @@ jQuery(function ($) {
 				}.bind(this)
 			}).init('/all');
 
-			$.getJSON( "https://api.github.com/issues?access_token=#{PUT_YOUR_TOKEN_HERE_PLZ}", function( data ) {
-				$.each(data, function( k, v ) {
-					App.populateGithubToDos([v.repository.name.toString() + ": " + v.title.toString()]);
-				});
-			});
+			if (this.todos == []) this.getIssues();
+			//add button to accept user token from prompt
+			// $.getJSON( "https://api.github.com/issues?access_token=ed6e29cd13663dc1be96f9b82cf1f5df398baa29", function( data ) {
+			// 	$.each(data, function( k, v ) {
+			// 		var a = v.repository.name.toString() + ": " + v.title.toString();
+			// 		if (a.length > 40) { a = a.substring(0, 40) + "..."; }
+			// 		App.populateGithubToDos([a]);
+			// 	});
+			// });
 		},
 		cacheElements: function () {
 			this.todoTemplate = Handlebars.compile($('#todo-template').html());
@@ -78,6 +82,7 @@ jQuery(function ($) {
 			this.$newTodo.on('keyup', this.create.bind(this));
 			this.$toggleAll.on('change', this.toggleAll.bind(this));
 			this.$footer.on('click', '#clear-completed', this.destroyCompleted.bind(this));
+			list.on('click', '.Issues', App.getIssues());
 			list.on('change', '.toggle', this.toggle.bind(this));
 			list.on('dblclick', 'label', this.edit.bind(this));
 			list.on('keyup', '.edit', this.editKeyup.bind(this));
@@ -153,8 +158,17 @@ jQuery(function ($) {
 				}
 			}
 		},
-		getIssues: function (e) {
-
+		getIssues: function () {
+			var token = this.appToken || prompt("Please ENTER your GITHUB Access Key", "Key...");
+			console.log("appToken: " + this.appToken + " :: token: " + token);
+			$.getJSON( "https://api.github.com/issues?access_token=" + token, function( data ) {
+				$.each(data, function( k, v ) {
+					var a = v.repository.name.toString() + ": " + v.title.toString();
+					if (a.length > 40) { a = a.substring(0, 40) + "..."; }
+					App.populateGithubToDos([a]);
+				});
+			});
+			localStorage.setItem('appToken', token);
 		},
 
 		create: function (e) {
@@ -179,11 +193,21 @@ jQuery(function ($) {
 			// loop through array, each element push into this.todos
 			// make a button, only actives when user hits it.
 			for (var i = 0; i < array.length; i++) {
-				this.todos.push({
-					id: util.uuid(),
-					title: array[i],
-					completed: false
+
+				var dupe = false;
+				this.todos.forEach( function (td){
+				  if (array[i] == td.title) {
+				 	  dupe = true;
+				 	}
 				});
+
+				if (dupe != true) {
+					this.todos.push({
+						id: util.uuid(),
+						title: array[i],
+						completed: false
+					});
+				}
 
 				this.render();
 			}
