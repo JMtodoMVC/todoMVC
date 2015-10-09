@@ -55,14 +55,6 @@ jQuery(function ($) {
 			}).init('/all');
 
 			if (this.todos == []) this.getIssues();
-			//add button to accept user token from prompt
-			// $.getJSON( "https://api.github.com/issues?access_token=ed6e29cd13663dc1be96f9b82cf1f5df398baa29", function( data ) {
-			// 	$.each(data, function( k, v ) {
-			// 		var a = v.repository.name.toString() + ": " + v.title.toString();
-			// 		if (a.length > 40) { a = a.substring(0, 40) + "..."; }
-			// 		App.populateGithubToDos([a]);
-			// 	});
-			// });
 		},
 		cacheElements: function () {
 			this.todoTemplate = Handlebars.compile($('#todo-template').html());
