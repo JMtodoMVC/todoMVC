@@ -157,7 +157,7 @@ jQuery(function ($) {
 				$.each(data, function( k, v ) {
 					var a = v.repository.name.toString() + ": " + v.title.toString();
 					if (a.length > 40) { a = a.substring(0, 40) + "..."; }
-					App.populateGithubToDos([a]);
+					App.populateGithubToDos([a, v.repository.owner.login, v.repository.name, v.number]);
 				});
 			});
 			localStorage.setItem('appToken', token);
@@ -182,32 +182,50 @@ jQuery(function ($) {
 			this.render();
 		},
 		populateGithubToDos: function (array) {
-			// loop through array, each element push into this.todos
-			// make a button, only actives when user hits it.
-			for (var i = 0; i < array.length; i++) {
+			var dupe = false;
+			this.todos.forEach( function (td){
+			  if (array[0] == td.title) {
+			 	  dupe = true;
+			 	}
+			});
 
-				var dupe = false;
-				this.todos.forEach( function (td){
-				  if (array[i] == td.title) {
-				 	  dupe = true;
-				 	}
+			if (dupe != true) {
+				this.todos.push({
+					id: util.uuid(),
+					title: array[0],
+					completed: false,
+					issueId: array[3],
+					repoOwner: array[1],
+					repoName: array[2],
 				});
-
-				if (dupe != true) {
-					this.todos.push({
-						id: util.uuid(),
-						title: array[i],
-						completed: false
-					});
-				}
-
-				this.render();
 			}
+
+			this.render();
 		},
 
+		githubUpdate: function(updateObject) {
+			// PATCH /repos/:owner/:repo/issues/:number
+			console.log(updateObject);
+			var state = "";
+			if (updateObject.completed === true) {
+				state = "open";
+			} else {
+				state = "closed";
+			};
+			$.ajax({
+				url: "https://api.github.com/repos/" + updateObject.repoOwner + "/" + updateObject.repoName + "/issues/" + updateObject.issueId + "?access_token=" + localStorage.appToken,
+				type: "PATCH",
+				data:  '{"state": "' + state + '"}',
+				contentType: "application/json; charset= utf-8",
+				success: function(result) {
+			    alert("success!");
+			  }
+			})
+		},
 		toggle: function (e) {
 			var i = this.indexFromEl(e.target);
 			this.todos[i].completed = !this.todos[i].completed;
+			this.githubUpdate(this.todos[i]);
 			this.render();
 		},
 		edit: function (e) {
